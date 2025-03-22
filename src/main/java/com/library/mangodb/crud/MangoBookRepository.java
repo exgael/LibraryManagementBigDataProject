@@ -259,17 +259,17 @@ public class MangoBookRepository extends MongoGenericRepository<Book> {
 						List<String> authorIds = authorIdObjs.stream()
 										.map(obj -> obj instanceof ObjectId ? ((ObjectId) obj).toHexString() : obj.toString())
 										.collect(Collectors.toList());
-						book.setAuthors(authorIds);
+						book.setAuthorsId(authorIds);
 				}
 
 				// Set category ID
 				if (doc.containsKey("categoryId")) {
-						book.setCategory(MangoUtils.getIdAsString(doc, "categoryId"));
+						book.setCategoryId(MangoUtils.getIdAsString(doc, "categoryId"));
 				}
 
 				// Set publisher ID
 				if (doc.containsKey("publisherId")) {
-						book.setPublisher(MangoUtils.getIdAsString(doc, "publisherId"));
+						book.setPublisherId(MangoUtils.getIdAsString(doc, "publisherId"));
 				}
 
 				// Convert loan history

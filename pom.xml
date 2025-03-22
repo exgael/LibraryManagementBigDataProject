@@ -93,15 +93,34 @@
     </dependency>
 
     <!-- useful for mongodb -->
+<!--    <dependency>-->
+<!--      <groupId>org.slf4j</groupId>-->
+<!--      <artifactId>slf4j-api</artifactId>-->
+<!--      <version>2.0.9</version>-->
+<!--    </dependency>-->
+<!--    <dependency>-->
+<!--      <groupId>org.slf4j</groupId>-->
+<!--      <artifactId>slf4j-simple</artifactId>-->
+<!--      <version>2.0.9</version>-->
+<!--    </dependency>-->
+
+    <!-- MongoDB ORM -->
+
+    <!-- Add these dependencies to your pom.xml -->
+      <!-- Spring Data MongoDB -->
+    <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-mongodb -->
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>2.0.9</version>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-mongodb</artifactId>
+      <version>3.4.3</version>
     </dependency>
+
+      <!-- Lombok for reducing boilerplate code -->
+    <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <version>2.0.9</version>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.18.36</version>
     </dependency>
 
   </dependencies>

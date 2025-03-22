@@ -121,15 +121,15 @@ public class ModelDataGenerator {
 								Author author = getRandomElement(authors, random);
 								bookAuthors.add(author.getId());
 						}
-						book.setAuthors(bookAuthors);
+						book.setAuthorsId(bookAuthors);
 
 						// Assign category
 						Category category = getRandomElement(categories, random);
-						book.setCategory(category.getId());
+						book.setCategoryId(category.getId());
 
 						// Assign publisher
 						Publisher publisher = getRandomElement(publishers, random);
-						book.setPublisher(publisher.getId());
+						book.setPublisherId(publisher.getId());
 
 						// Generate loan history (0-10 loans)
 						int loanCount = random.nextInt(11);
