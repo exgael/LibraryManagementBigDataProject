@@ -69,7 +69,7 @@ public abstract class GenericDataLoader<T, R> {
 				Path entityFilePath = getEntityFilePath();
 
 				if (!Files.exists(entityFilePath)) {
-						logger.info("No existing {} data found, (re)generating entire database data", getEntityName());
+						logger.info("No existing {} data found (possible incoherence), dropping entire database data", getEntityName());
 						ModelDataGenerator.generateData();
 						resetDatabase();
 				}

@@ -212,7 +212,7 @@ public class MangoMemberRepository extends MongoGenericRepository<Member> {
 												.append("isbn", loan.getIsbn())
 												.append("loanDate", loan.getLoanDate())
 												.append("dueDate", loan.getDueDate())
-												.append("isOverdue", loan.isOverdue());
+												.append("isOverdue", loan.getIsOverdue());
 
 								loanDocs.add(loanDoc);
 						}

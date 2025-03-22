@@ -1,11 +1,14 @@
 package com.library.common.model;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 import java.util.Map;
 
-@Data
+@Getter
+@Setter
 public class Book {
 		private String id;
 		private String isbn;
@@ -19,13 +22,13 @@ public class Book {
 		private List<LoanRecord> loanHistory;
 		private Map<String, Object> metadata;
 
-		// Embedded loan records
-		@Data
+		@Getter
+		@Setter
 		public static class LoanRecord {
 				private String memberId;
 				private String memberName;
 				private long loanDate;
 				private long dueDate;
-				private Long returnDate; // Nullable for active loans
+				private Long returnDate;
 		}
 }
