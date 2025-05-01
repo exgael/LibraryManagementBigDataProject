@@ -4,6 +4,7 @@ import com.library.mangodb.MangoUtils;
 import com.library.mangodb.MongoConfig;
 import com.library.common.model.Publisher;
 import com.library.common.util.ModelDataGenerator;
+import com.library.mangodb.manager.MangoPublisherManager;
 import com.mongodb.client.model.UpdateOptions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -151,7 +152,59 @@ public class MangoPublisherRepository extends MongoGenericRepository<Publisher> 
 				logger.info("Publishers after deletion: {}", publishersAfterDeletion.size());
 				logger.info("Deleted {} publishers", publishersBeforeDeletion.size() - publishersAfterDeletion.size());
 
-				logger.info("All publisher tests completed!");
+			// =====================
+			// AGGREGATION OPERATIONS
+			// =====================
+
+						logger.info("=== AGGREGATION TESTS: MangoPublisherManager ===");
+						MangoPublisherManager manager = new MangoPublisherManager();
+
+			// 1. Group publishers by first letter
+						logger.info("=== Testing groupByFirstLetter ===");
+						for (Document doc : manager.groupByFirstLetter()) {
+							logger.info("First Letter: {}, Count: {}", doc.get("_id"), doc.get("count"));
+						}
+
+			// 2. Total number of books per publisher
+						logger.info("=== Testing totalBooksPerPublisher ===");
+						for (Document doc : manager.totalBooksPerPublisher()) {
+							logger.info("Publisher: {}, Total Books: {}", doc.get("name"), doc.get("totalBooks"));
+						}
+
+			// 3. Publishers with list of book titles
+						logger.info("=== Testing publishersWithBooks ===");
+						for (Document doc : manager.publishersWithBooks()) {
+							logger.info("Publisher: {}", doc.get("name"));
+							List<Document> books = (List<Document>) doc.get("books");
+							if (books != null) {
+								for (Document book : books) {
+									logger.info(" - Book Title: {}", book.get("title"));
+								}
+							}
+						}
+
+			// 4. Publishers that have published books with keyword in title
+						String keyword = "magic";
+						logger.info("=== Testing publishersByBookTitleKeyword (keyword: {}) ===", keyword);
+						for (Document doc : manager.publishersByBookTitleKeyword(keyword)) {
+							logger.info("Matching Publisher: {}", doc.get("name"));
+						}
+
+			// 5. Publishers sorted by average number of pages
+						logger.info("=== Testing publishersByAvgPages ===");
+						for (Document doc : manager.publishersByAvgPages()) {
+							logger.info("Publisher: {}, Average Pages: {}", doc.get("name"), doc.get("avgPages"));
+						}
+
+			// 6. Number of books published per year per publisher
+						logger.info("=== Testing booksPerYearPerPublisher ===");
+						for (Document doc : manager.booksPerYearPerPublisher()) {
+							Document id = (Document) doc.get("_id");
+							logger.info("Publisher: {}, Year: {}, Book Count: {}",
+									id.get("publisher"), id.get("year"), doc.get("count"));
+						}
+
+			logger.info("All publisher tests completed!");
 		}
 
 		@Override
