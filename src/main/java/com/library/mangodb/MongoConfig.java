@@ -1,5 +1,7 @@
 package com.library.mangodb;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
@@ -37,4 +39,14 @@ public class MongoConfig {
 						mongoClient = null;
 				}
 		}
+
+	private static final ObjectMapper mapper = new ObjectMapper();
+
+	public static String toJson(Object obj) {
+		try {
+			return mapper.writeValueAsString(obj);
+		} catch (Exception e) {
+			throw new RuntimeException("Error converting to JSON", e);
+		}
+	}
 }

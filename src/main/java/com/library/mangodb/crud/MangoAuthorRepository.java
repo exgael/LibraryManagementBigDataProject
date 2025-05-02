@@ -169,44 +169,6 @@ public class MangoAuthorRepository extends MongoGenericRepository<Author> {
 
 				logger.info("All author tests completed successfully!");
 
-
-				// Tests des methodes d'integrations, jointures etc
-
-				MangoAuthorManager manager = new MangoAuthorManager();
-
-				logger.info("=== 1. Test countAuthorsByNationality ===");
-				manager.countAuthorsByNationality(); // Affiche dans la console
-
-				logger.info("=== 2. Test listAuthorsByNationality ===");
-				String targetNationality = "French"; // mais en fait comme a chaque fois qu'on lance on a des auteurs différents parfois ya pas de francais et c'est okay
-				manager.listAuthorsByNationality(targetNationality); // Affiche dans la console
-
-				logger.info("=== 3. Test findAuthorsStartingWith ===");
-				char startingLetter = 'A';
-				manager.findAuthorsStartingWith(startingLetter); // Affiche dans la console
-
-				logger.info("=== 4. Test computeNameLengthForAuthors ===");
-				manager.computeNameLengthForAuthors(); // Affiche dans la console
-
-				logger.info("=== 5. Test countAuthorsWithUnknownNationality ===");
-				manager.countAuthorsWithUnknownNationality(); // Affiche dans la console
-
-				logger.info("=== 6. Test sortAuthorsByName ===");
-				manager.sortAuthorsByName(); // Affiche dans la console
-
-				logger.info("=== 7. Test getAuthorsWithBooks ===");
-				List<Document> authorsWithBooks = manager.getAuthorsWithBooks();
-				for (Document doc : authorsWithBooks) {
-					logger.info("Author: {}", doc.getString("name"));
-					List<Document> books = (List<Document>) doc.get("books");
-					if (books != null) {
-						for (Document book : books) {
-							logger.info("  -> Book: {}", book.getString("title"));
-						}
-					} else {
-						logger.info("  -> No books found");
-					}
-				}
 		}
 
 		@Override

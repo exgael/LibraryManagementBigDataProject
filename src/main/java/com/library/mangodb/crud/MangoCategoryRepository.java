@@ -180,37 +180,6 @@ public class MangoCategoryRepository extends MongoGenericRepository<Category> {
 						logger.info("Deleted {} categories", categoriesBeforeDeletion.size() - categoriesAfterDeletion.size());
 				}
 
-				// ==============================
-				// AGGREGATION PIPELINE TESTS
-				// ==============================
-
-				logger.info("=== Instantiating MangoCategoryManager ===");
-				MangoCategoryManager manager = new MangoCategoryManager();
-
-				// Test 1 - Compter les sous-catégories par catégorie principale
-				logger.info("=== Testing countSubcategoriesPerMainCategory ===");
-				manager.countSubcategoriesPerMainCategory(); // Affiche les résultats groupés par catégorie racine
-
-				// Test 2 - Lister les chemins hiérarchiques triés par profondeur
-				logger.info("=== Testing listCategoryPathsByDepth ===");
-				manager.listCategoryPathsByDepth(); // Affiche les catégories avec leur profondeur hiérarchique
-
-				// Test 3 - Compter le nombre de catégories par niveau hiérarchique
-				logger.info("=== Testing countCategoriesByLevel ===");
-				manager.countCategoriesByLevel(); // Affiche le nombre de catégories à chaque niveau (1, 2, ...)
-
-				// Test 4 - Mettre en évidence les noms contenant un mot-clé
-				logger.info("=== Testing highlightCategoriesWithKeyword ===");
-				manager.highlightCategoriesWithKeyword("fiction"); // Capitalise les occurrences de "fiction" dans les noms
-
-				// Test 5 - Statistiques sur la longueur des noms
-				logger.info("=== Testing categoryNameLengthStats ===");
-				manager.categoryNameLengthStats(); // Affiche min, max, moyenne des longueurs des noms de catégories
-
-				// Test 6 - Reconstituer la hiérarchie des catégories
-				logger.info("=== Testing reconstructCategoryHierarchy ===");
-				manager.reconstructCategoryHierarchy(); // Affiche les catégories avec leur parent immédiat
-
 			logger.info("All category tests completed successfully!");
 		}
 

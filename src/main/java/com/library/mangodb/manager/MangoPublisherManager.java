@@ -1,22 +1,16 @@
 package com.library.mangodb.manager;
 
+import com.library.common.model.Author;
+import com.library.common.model.Book;
+import com.library.common.model.Publisher;
+import com.library.common.util.ModelDataGenerator;
 import com.library.mangodb.MongoConfig;
-import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static com.mongodb.client.model.Aggregates.*;
-import static com.mongodb.client.model.Filters.*;
-import static com.mongodb.client.model.Accumulators.*;
-import static com.mongodb.client.model.Projections.*;
-import static com.mongodb.client.model.Sorts.*;
-
-/**
- * Classe de gestion avancée des éditeurs (publishers)
- */
 public class MangoPublisherManager {
 
     private final MongoCollection<Document> publisherCollection;
@@ -25,67 +19,138 @@ public class MangoPublisherManager {
         this.publisherCollection = MongoConfig.getDatabase().getCollection("publishers");
     }
 
-    // 1. Regrouper les éditeurs par première lettre de leur nom
-    public AggregateIterable<Document> groupByFirstLetter() {
-        return publisherCollection.aggregate(Arrays.asList(
-                project(new Document("firstLetter", new Document("$substr", Arrays.asList("$name", 0, 1)))),
-                group("$firstLetter", sum("count", 1)),
-                sort(ascending("_id"))
-        ));
+    // 1. Nombre de livres publiés par éditeur
+    public void countBooksPerPublisher() {
+        List<Document> pipeline = Arrays.asList(
+                new Document("$lookup", new Document("from", "books")
+                        .append("localField", "id")
+                        .append("foreignField", "publisherId")
+                        .append("as", "books")),
+                new Document("$project", new Document("name", 1)
+                        .append("bookCount", new Document("$size", "$books"))),
+                new Document("$sort", new Document("bookCount", -1))
+        );
+        publisherCollection.aggregate(pipeline).forEach(doc -> System.out.println(doc.toJson()));
     }
 
-    // 2. Nombre total de livres publiés par chaque éditeur (nécessite une collection "books" avec un champ "publisherId")
-    public AggregateIterable<Document> totalBooksPerPublisher() {
-        return publisherCollection.aggregate(Arrays.asList(
-                lookup("books", "_id", "publisherId", "books"),
-                project(fields(include("name"), computed("totalBooks", new Document("$size", "$books")))),
-                sort(descending("totalBooks"))
-        ));
+    // 2. Liste unique des auteurs publiés par éditeur
+    public void listAuthorsPerPublisher() {
+        List<Document> pipeline = Arrays.asList(
+                new Document("$lookup", new Document("from", "books")
+                        .append("localField", "id")
+                        .append("foreignField", "publisherId")
+                        .append("as", "books")),
+                new Document("$unwind", "$books"),
+                new Document("$unwind", "$books.authorsId"),
+                new Document("$lookup", new Document("from", "authors")
+                        .append("localField", "books.authorsId")
+                        .append("foreignField", "id")
+                        .append("as", "author")),
+                new Document("$unwind", "$author"),
+                new Document("$group", new Document("_id", "$name")
+                        .append("authors", new Document("$addToSet", "$author.name"))),
+                new Document("$project", new Document("publisher", "$_id")
+                        .append("authors", 1)
+                        .append("_id", 0))
+        );
+        publisherCollection.aggregate(pipeline).forEach(doc -> System.out.println(doc.toJson()));
     }
 
-    // 3. Jointure : Liste des éditeurs avec les titres des livres associés
-    public AggregateIterable<Document> publishersWithBooks() {
-        return publisherCollection.aggregate(Arrays.asList(
-                lookup("books", "_id", "publisherId", "books"),
-                project(fields(include("name"), include("books.title")))
-        ));
+    // 3. Moyenne du nombre de pages des livres par éditeur
+    public void averagePagesPerPublisher() {
+        List<Document> pipeline = Arrays.asList(
+                new Document("$lookup", new Document("from", "books")
+                        .append("localField", "id")
+                        .append("foreignField", "publisherId")
+                        .append("as", "books")),
+                new Document("$unwind", "$books"),
+                new Document("$group", new Document("_id", "$name")
+                        .append("averagePages", new Document("$avg", "$books.pageCount"))),
+                new Document("$sort", new Document("averagePages", -1))
+        );
+        publisherCollection.aggregate(pipeline).forEach(doc -> System.out.println(doc.toJson()));
     }
 
-    // 4. Recherche des éditeurs ayant publié des livres contenant un mot-clé dans le titre
-    public AggregateIterable<Document> publishersByBookTitleKeyword(String keyword) {
-        return publisherCollection.aggregate(Arrays.asList(
-                lookup("books", "_id", "publisherId", "books"),
-                match(expr(new Document("$gt", Arrays.asList(
-                        new Document("$size", new Document("$filter", new Document("input", "$books")
-                                .append("as", "b")
-                                .append("cond", new Document("$regexMatch", new Document("input", "$$b.title")
-                                        .append("regex", keyword)
-                                        .append("options", "i"))))),
-                        0 // ✅ second argument to $gt
-                )))),
-                project(fields(include("name")))
-        ));
+    // 4. Éditeurs ayant publié plus de N livres
+    public void publishersWithMoreThanNBooks(int n) {
+        List<Document> pipeline = Arrays.asList(
+                new Document("$lookup", new Document("from", "books")
+                        .append("localField", "id")
+                        .append("foreignField", "publisherId")
+                        .append("as", "books")),
+                new Document("$project", new Document("name", 1)
+                        .append("bookCount", new Document("$size", "$books"))),
+                new Document("$match", new Document("bookCount", new Document("$gt", n))),
+                new Document("$sort", new Document("bookCount", -1))
+        );
+        publisherCollection.aggregate(pipeline).forEach(doc -> System.out.println(doc.toJson()));
+    }
+
+    // 5. Classement par nombre total d’emprunts dans loanHistory
+    public void rankPublishersByTotalLoans() {
+        List<Document> pipeline = Arrays.asList(
+                new Document("$lookup", new Document("from", "books")
+                        .append("localField", "id")
+                        .append("foreignField", "publisherId")
+                        .append("as", "books")),
+                new Document("$unwind", "$books"),
+                new Document("$project", new Document("name", 1)
+                        .append("loanCount", new Document("$cond", Arrays.asList(
+                                new Document("$isArray", "$books.loanHistory"),
+                                new Document("$size", "$books.loanHistory"),
+                                0)))),
+                new Document("$group", new Document("_id", "$name")
+                        .append("totalLoans", new Document("$sum", "$loanCount"))),
+                new Document("$sort", new Document("totalLoans", -1))
+        );
+        publisherCollection.aggregate(pipeline).forEach(doc -> System.out.println(doc.toJson()));
     }
 
 
-    // 5. Editeurs classés par nombre moyen de pages de leurs livres
-    public AggregateIterable<Document> publishersByAvgPages() {
-        return publisherCollection.aggregate(Arrays.asList(
-                lookup("books", "_id", "publisherId", "books"),
-                project(fields(include("name"), computed("avgPages", new Document("$avg", "$books.pageCount")))),
-                sort(descending("avgPages"))
-        ));
+    public static void main(String[] args) {
+        // Drop and initialize the collections
+        MongoCollection<Document> publisherCollection = MongoConfig.getDatabase().getCollection("publishers");
+        MongoCollection<Document> bookCollection = MongoConfig.getDatabase().getCollection("books");
+        MongoCollection<Document> authorCollection = MongoConfig.getDatabase().getCollection("authors");
+
+        publisherCollection.drop();
+        bookCollection.drop();
+        authorCollection.drop();
+
+        // Générer et insérer des éditeurs, des auteurs et des livres
+        List<Publisher> publishers = ModelDataGenerator.generatePublishers(10);
+        List<Author> authors = ModelDataGenerator.generateAuthors(10);  // Générer des auteurs
+        List<Book> books = ModelDataGenerator.generateBooks(30);  // Générer des livres
+
+        List<Document> publisherDocs = publishers.stream().map(publisher -> Document.parse(MongoConfig.toJson(publisher))).toList();
+        List<Document> authorDocs = authors.stream().map(author -> Document.parse(MongoConfig.toJson(author))).toList();
+        List<Document> bookDocs = books.stream().map(book -> Document.parse(MongoConfig.toJson(book))).toList();
+
+        publisherCollection.insertMany(publisherDocs);
+        authorCollection.insertMany(authorDocs);
+        bookCollection.insertMany(bookDocs);
+
+        // Initialiser le manager et exécuter les tests
+        MangoPublisherManager manager = new MangoPublisherManager();
+
+        System.out.println("\n--- Nombre de livres publiés par éditeur ---");
+        manager.countBooksPerPublisher();
+
+        System.out.println("\n--- Liste unique des auteurs publiés par éditeur ---");
+        manager.listAuthorsPerPublisher();
+
+        System.out.println("\n--- Moyenne du nombre de pages des livres par éditeur ---");
+        manager.averagePagesPerPublisher();
+
+        System.out.println("\n--- Éditeurs ayant publié plus de N livres ---");
+        int n = 5; // Exemple : éditeurs ayant publié plus de 5 livres
+        manager.publishersWithMoreThanNBooks(n);
+
+        System.out.println("\n--- Classement par nombre total d’emprunts dans loanHistory ---");
+        manager.rankPublishersByTotalLoans();
+
     }
 
-    // 6. Nombre de livres par année pour chaque éditeur
-    public AggregateIterable<Document> booksPerYearPerPublisher() {
-        return publisherCollection.aggregate(Arrays.asList(
-                lookup("books", "_id", "publisherId", "books"),
-                unwind("$books"),
-                project(new Document("name", 1)
-                        .append("year", new Document("$year", "$books.publishedDate"))),
-                group(new Document("publisher", "$name").append("year", "$year"), sum("count", 1)),
-                sort(ascending("_id.year"))
-        ));
-    }
+
+
 }

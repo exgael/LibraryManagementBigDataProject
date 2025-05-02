@@ -161,36 +161,6 @@ public class MangoBookRepository extends MongoGenericRepository<Book> {
 				logger.info("Books after deletion: {}", booksAfterDeletion.size());
 				logger.info("Deleted {} books", booksBeforeDeletion.size() - booksAfterDeletion.size());
 
-
-				// ===========================
-				// TESTS DES MÉTHODES COMPLEXES
-				// ===========================
-
-				// Création du manager
-				MangoBookManager manager = new MangoBookManager();
-
-				// ===========================
-				// TEST DES MÉTHODES D’AGRÉGATION
-				// ===========================
-
-				logger.info("\n[TEST 1] Nombre de livres par année de publication");
-				manager.countBooksPerPublicationYear();
-
-				logger.info("\n[TEST 2] Moyenne de pages par catégorie (avec jointure)");
-				manager.averagePageCountPerCategory();
-
-				logger.info("\n[TEST 3] Liste des livres avec leurs auteurs");
-				manager.listBooksWithAuthors();
-
-				logger.info("\n[TEST 4] Emprunts groupés par membre et livre (recherche hiérarchique)");
-				manager.loansGroupedByMemberAndBook();
-
-				logger.info("\n[TEST 5] Liste des livres jamais retournés");
-				manager.listUnreturnedBooks();
-
-				logger.info("\n[TEST 6] Nombre total de prêts par livre");
-				manager.countLoansPerBook();
-
 			logger.info("All tests completed successfully!");
 		}
 

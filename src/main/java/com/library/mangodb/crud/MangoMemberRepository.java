@@ -168,58 +168,6 @@ public class MangoMemberRepository extends MongoGenericRepository<Member> {
 				logger.info("Members after deletion: {}", membersAfterDeletion.size());
 				logger.info("Deleted {} members", membersBeforeDeletion.size() - membersAfterDeletion.size());
 
-			// =====================
-			// AGGREGATION OPERATIONS
-			// =====================
-
-
-	// Test countMembersByYear
-				logger.info("=== Testing countMembersByYear ===");
-				AggregateIterable<Document> membersByYear = manager.countMembersByYear();
-				for (Document doc : membersByYear) {
-					logger.info("Year: {}, Member Count: {}", doc.get("_id"), doc.get("count"));
-				}
-
-	// Test membersWithOverdueLoans
-				logger.info("=== Testing membersWithOverdueLoans ===");
-				AggregateIterable<Document> overdueMembers = manager.membersWithOverdueLoans();
-				for (Document doc : overdueMembers) {
-					logger.info("Overdue Member: {} {}, Email: {}, Active Loans: {}",
-							doc.getString("firstName"), doc.getString("lastName"), doc.getString("email"), doc.get("activeLoans"));
-				}
-
-	// Test topReadersThisYear
-				int limit = 5;
-				logger.info("=== Testing topReadersThisYear ===");
-				AggregateIterable<Document> topReaders = manager.topReadersThisYear(limit);
-				for (Document doc : topReaders) {
-					logger.info("Top Reader: {} {}, Books Read This Year: {}",
-							doc.getString("firstName"), doc.getString("lastName"), doc.get("readingStats.booksReadThisYear"));
-				}
-
-	// Test groupByPreferredFormat
-				logger.info("=== Testing groupByPreferredFormat ===");
-				AggregateIterable<Document> groupedByFormat = manager.groupByPreferredFormat();
-				for (Document doc : groupedByFormat) {
-					logger.info("Preferred Format: {}, Member Count: {}",
-							doc.getString("_id"), doc.get("count"));
-				}
-
-	// Test membersWhoLoveFantasy
-				logger.info("=== Testing membersWhoLoveFantasy ===");
-				AggregateIterable<Document> fantasyLovers = manager.membersWhoLoveFantasy();
-				for (Document doc : fantasyLovers) {
-					logger.info("Fantasy Lover: {} {}, Favorite Subjects: {}",
-							doc.getString("firstName"), doc.getString("lastName"), doc.get("preferences.favoriteSubjects"));
-				}
-
-	// Test avgReturnDaysByReadingVolume
-				logger.info("=== Testing avgReturnDaysByReadingVolume ===");
-				AggregateIterable<Document> avgReturnDays = manager.avgReturnDaysByReadingVolume();
-				for (Document doc : avgReturnDays) {
-					logger.info("Volume Bucket: {}, Average Return Days: {}",
-							doc.get("_id"), doc.get("avgReturnDays"));
-				}
 
 			logger.info("All member tests completed successfully!");
 		}
