@@ -39,11 +39,13 @@ docker run -d --name ravendb -p 8080:8080 -p 38888:38888 -v ravendb-data:/opt/Ra
 * Dossier : `generated-data/`
 * Utilisé par le générateur de données  ; son contenu peut être régénéré.
 
+* Génération: `src/main/java/com/library/common/util/ModelDataGenerator.java`
+
 ### 4. Scripts de chargement
 
 * **MongoDB** : `src/main/java/com/library/mongodb/dataloader`
 * **RavenDB** : `src/main/java/com/library/ravendb/dataloader`
-* Exécutez les classes `main` correspondantes.
+* Exécutez les classes `main` correspondantes
 
 ### 5. Sources Java (chapitres 6, 7 et 8)
 
