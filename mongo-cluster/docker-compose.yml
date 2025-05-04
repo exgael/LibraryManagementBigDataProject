@@ -1,0 +1,170 @@
+version: '3.8'
+
+networks:
+  mongo-cluster:
+    driver: bridge
+
+services:
+
+  # --- Config Servers Replica Set (configReplSet) ---
+  configsvr1:
+    image: mongo:6.0
+    container_name: configsvr1
+    command: ["mongod", "--configsvr", "--replSet", "configReplSet", "--bind_ip_all", "--port", "27017"]
+    volumes:
+      - ./data/config1:/data/db
+    networks:
+      - mongo-cluster
+    expose:
+      - "27017" # Exposé seulement au réseau interne
+
+  configsvr2:
+    image: mongo:6.0
+    container_name: configsvr2
+    command: ["mongod", "--configsvr", "--replSet", "configReplSet", "--bind_ip_all", "--port", "27017"]
+    volumes:
+      - ./data/config2:/data/db
+    networks:
+      - mongo-cluster
+    expose:
+      - "27017"
+
+  configsvr3:
+    image: mongo:6.0
+    container_name: configsvr3
+    command: ["mongod", "--configsvr", "--replSet", "configReplSet", "--bind_ip_all", "--port", "27017"]
+    volumes:
+      - ./data/config3:/data/db
+    networks:
+      - mongo-cluster
+    expose:
+      - "27017"
+
+  # --- Shard 1 Replica Set (shard1ReplSet) ---
+  shard1a:
+    image: mongo:6.0
+    container_name: shard1a
+    command: ["mongod", "--shardsvr", "--replSet", "shard1ReplSet", "--bind_ip_all", "--port", "27017"]
+    volumes:
+      - ./data/shard1a:/data/db
+    networks:
+      - mongo-cluster
+    expose:
+      - "27017"
+
+  shard1b:
+    image: mongo:6.0
+    container_name: shard1b
+    command: ["mongod", "--shardsvr", "--replSet", "shard1ReplSet", "--bind_ip_all", "--port", "27017"]
+    volumes:
+      - ./data/shard1b:/data/db
+    networks:
+      - mongo-cluster
+    expose:
+      - "27017"
+
+  shard1c:
+    image: mongo:6.0
+    container_name: shard1c
+    command: ["mongod", "--shardsvr", "--replSet", "shard1ReplSet", "--bind_ip_all", "--port", "27017"]
+    volumes:
+      - ./data/shard1c:/data/db
+    networks:
+      - mongo-cluster
+    expose:
+      - "27017"
+
+  # --- Shard 2 Replica Set (shard2ReplSet) ---
+  shard2a:
+    image: mongo:6.0
+    container_name: shard2a
+    command: ["mongod", "--shardsvr", "--replSet", "shard2ReplSet", "--bind_ip_all", "--port", "27017"]
+    volumes:
+      - ./data/shard2a:/data/db
+    networks:
+      - mongo-cluster
+    expose:
+      - "27017"
+
+  shard2b:
+    image: mongo:6.0
+    container_name: shard2b
+    command: ["mongod", "--shardsvr", "--replSet", "shard2ReplSet", "--bind_ip_all", "--port", "27017"]
+    volumes:
+      - ./data/shard2b:/data/db
+    networks:
+      - mongo-cluster
+    expose:
+      - "27017"
+
+  shard2c:
+    image: mongo:6.0
+    container_name: shard2c
+    command: ["mongod", "--shardsvr", "--replSet", "shard2ReplSet", "--bind_ip_all", "--port", "27017"]
+    volumes:
+      - ./data/shard2c:/data/db
+    networks:
+      - mongo-cluster
+    expose:
+      - "27017"
+
+  # --- Shard 3 Replica Set (shard3ReplSet) ---
+  shard3a:
+    image: mongo:6.0
+    container_name: shard3a
+    command: ["mongod", "--shardsvr", "--replSet", "shard3ReplSet", "--bind_ip_all", "--port", "27017"]
+    volumes:
+      - ./data/shard3a:/data/db
+    networks:
+      - mongo-cluster
+    expose:
+      - "27017"
+
+  shard3b:
+    image: mongo:6.0
+    container_name: shard3b
+    command: ["mongod", "--shardsvr", "--replSet", "shard3ReplSet", "--bind_ip_all", "--port", "27017"]
+    volumes:
+      - ./data/shard3b:/data/db
+    networks:
+      - mongo-cluster
+    expose:
+      - "27017"
+
+  shard3c:
+    image: mongo:6.0
+    container_name: shard3c
+    command: ["mongod", "--shardsvr", "--replSet", "shard3ReplSet", "--bind_ip_all", "--port", "27017"]
+    volumes:
+      - ./data/shard3c:/data/db
+    networks:
+      - mongo-cluster
+    expose:
+      - "27017"
+
+
+  # --- Mongos Query Router ---
+  mongos:
+    image: mongo:6.0
+    container_name: mongos
+    # Note: depends_on ensures startup order, but not service readiness.
+    # Initialization scripts are still needed to wait for replica sets to be ready.
+    depends_on:
+      - configsvr1
+      - configsvr2
+      - configsvr3
+      - shard1a
+      - shard1b
+      - shard1c
+      - shard2a
+      - shard2b
+      - shard2c
+      - shard3a
+      - shard3b
+      - shard3c
+    # Connects to the config server replica set using internal names and port
+    command: [ "mongos", "--configdb", "configReplSet/configsvr1:27017,configsvr2:27017,configsvr3:27017", "--bind_ip_all", "--port", "27017" ]
+    ports:
+      - "27023:27017" # Map host port 27023 to container port 27017
+    networks:
+      - mongo-cluster

@@ -4,6 +4,8 @@ import com.library.mangodb.MangoUtils;
 import com.library.mangodb.MongoConfig;
 import com.library.common.model.Member;
 import com.library.common.util.ModelDataGenerator;
+import com.library.mangodb.manager.MangoMemberManager;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.model.UpdateOptions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,6 +29,7 @@ public class MangoMemberRepository extends MongoGenericRepository<Member> {
 
 		public static void main(String[] args) {
 				MangoMemberRepository repository = new MangoMemberRepository();
+				MangoMemberManager manager = new MangoMemberManager();
 
 				// Drop existing db for clean testing
 				logger.info("Resetting database");
@@ -165,7 +168,8 @@ public class MangoMemberRepository extends MongoGenericRepository<Member> {
 				logger.info("Members after deletion: {}", membersAfterDeletion.size());
 				logger.info("Deleted {} members", membersBeforeDeletion.size() - membersAfterDeletion.size());
 
-				logger.info("All member tests completed successfully!");
+
+			logger.info("All member tests completed successfully!");
 		}
 
 		@Override

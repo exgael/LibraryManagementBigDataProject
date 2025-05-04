@@ -4,6 +4,7 @@ import com.library.mangodb.MangoUtils;
 import com.library.mangodb.MongoConfig;
 import com.library.common.model.Author;
 import com.library.common.util.ModelDataGenerator;
+import com.library.mangodb.manager.MangoAuthorManager;
 import com.mongodb.client.model.UpdateOptions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -167,6 +168,7 @@ public class MangoAuthorRepository extends MongoGenericRepository<Author> {
 				}
 
 				logger.info("All author tests completed successfully!");
+
 		}
 
 		@Override
