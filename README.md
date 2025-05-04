@@ -13,6 +13,10 @@ Tous les fichiers peuvent être retrouvé ici:
     Points 5,6,7: Benoit Barbier
     Points 8,9: Laurine Collin Dufresne
 
+## Vidéo Présentation
+
+[Lien de la vidéo](https://youtu.be/BSzi10yNdX4)
+
 ## Prérequis
 
 * **JDK 23.0.2 (⚠️ langage level 16 minimum)**
