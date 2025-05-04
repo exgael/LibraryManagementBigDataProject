@@ -28,6 +28,7 @@ public class RavenConfig {
 
 						// Configure conventions if needed
 						store.getConventions().setIdentityPartsSeparator('/');
+						store.getConventions().setMaxNumberOfRequestsPerSession(5000);
 
 						// Initialize store
 						store.initialize();
