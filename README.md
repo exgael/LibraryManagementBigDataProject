@@ -28,12 +28,6 @@ docker run --name ravendb \
 * MongoDB : `mongosh mongodb://localhost:27017`
 * RavenDB : [http://localhost:8080](http://localhost:8080) (admin/admin par défaut)
 
-## Compilation & tests
-
-```bash
-mvn clean verify
-```
-
 ## Organisation du dépôt
 
 ### 1. Vidéo de démonstration (\~10 min)
