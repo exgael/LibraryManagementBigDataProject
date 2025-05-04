@@ -55,7 +55,7 @@ docker run -d --name ravendb -p 8080:8080 -p 38888:38888 -v ravendb-data:/opt/Ra
 
 ### 1. Vidéo de démonstration (\~10 min)
 
-* Dossier : [video/](https://github.com/exgael/LibraryManagementBigDataProject/tree/main/video)
+* Lien : [video](https://youtu.be/BSzi10yNdX4)
 
 ### 2. Rapport PDF (chapitres 1 à 5)
 
