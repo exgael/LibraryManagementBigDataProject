@@ -1,158 +1,159 @@
 package com.library.ravendb.manager;
 
-import com.library.common.model.Category;
 import com.library.common.model.Member;
 import com.library.common.util.ModelDataGenerator;
 import com.library.ravendb.RavenConfig;
 import net.ravendb.client.documents.DocumentStore;
 import net.ravendb.client.documents.session.IDocumentSession;
-import net.ravendb.client.documents.session.IDocumentQuery;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 public class RavenMemberManager {
 
-    private final DocumentStore store;
+		private final DocumentStore store;
 
-    public RavenMemberManager() {
-        this.store = RavenConfig.getDocumentStore();
-    }
+		public RavenMemberManager() {
+				this.store = RavenConfig.getDocumentStore();
+		}
 
-    // 1. Count members by registration year
-    public void countMembersByRegistrationYear() {
-        try (IDocumentSession session = RavenConfig.getDocumentStore().openSession()) {
-            List<Member> members = session.query(Member.class).toList();
+		public static void main(String[] args) {
+				// Reset RavenDB database
+				RavenConfig.resetDatabase();
 
-            Map<Integer, Long> countByYear = members.stream()
-                    .map(m -> LocalDateTime.ofInstant(Instant.ofEpochMilli(m.getRegistrationDate()), ZoneId.systemDefault()).getYear())
-                    .collect(Collectors.groupingBy(y -> y, TreeMap::new, Collectors.counting()));
+				RavenMemberManager manager = new RavenMemberManager();
 
-            countByYear.forEach((year, count) -> System.out.println("Year: " + year + ", Count: " + count));
-        }
-    }
+				// Génère quelques membres pour test
+				List<Member> members = ModelDataGenerator.generateMembers(10);
 
-    // 2. List members with overdue loans
-    public void listMembersWithOverdueLoans() {
-        try (IDocumentSession session = RavenConfig.getDocumentStore().openSession()) {
-            List<Member> members = session.query(Member.class).toList();
+				try (IDocumentSession session = manager.store.openSession()) {
+						for (Member member : members) {
+								session.store(member);
+						}
+						session.saveChanges();
+				}
 
-            members.stream()
-                    .filter(m -> m.getActiveLoans() != null && m.getActiveLoans().stream().anyMatch(Member.ActiveLoan::getIsOverdue))
-                    .forEach(m -> {
-                        List<Member.ActiveLoan> overdueLoans = m.getActiveLoans().stream()
-                                .filter(Member.ActiveLoan::getIsOverdue)
-                                .collect(Collectors.toList());
+				System.out.println("\n--- Members per registration year ---");
+				manager.countMembersByRegistrationYear();
 
-                        System.out.println("Member: " + m.getFirstName() + " " + m.getLastName() + ", Email: " + m.getEmail());
-                        overdueLoans.forEach(loan -> System.out.println("  Overdue Book: " + loan.getBookTitle()));
-                    });
-        }
-    }
+				System.out.println("\n--- Members with overdue loans ---");
+				manager.listMembersWithOverdueLoans();
 
-    // 3. Count number of active loans per member
-    public void countLoansPerMember() {
-        try (IDocumentSession session = RavenConfig.getDocumentStore().openSession()) {
-            List<Member> members = session.query(Member.class).toList();
+				System.out.println("\n--- Loans per member ---");
+				manager.countLoansPerMember();
 
-            members.forEach(m -> {
-                int count = m.getActiveLoans() == null ? 0 : m.getActiveLoans().size();
-                System.out.println(m.getFirstName() + " " + m.getLastName() + ": " + count + " loans");
-            });
-        }
-    }
+				System.out.println("\n--- Most preferred categories ---");
+				manager.mostPreferredCategories();
 
-    // 4. Most preferred categories
-    public void mostPreferredCategories() {
-        try (IDocumentSession session = RavenConfig.getDocumentStore().openSession()) {
-            List<Member> members = session.query(Member.class).toList();
-            Map<String, Integer> categoryScores = new HashMap<>();
+				System.out.println("\n--- Top favorite authors ---");
+				manager.topFavoriteAuthors();
 
-            for (Member m : members) {
-                if (m.getReadingStats() != null && m.getReadingStats().getCategoryPreferences() != null) {
-                    for (Map.Entry<String, Integer> entry : m.getReadingStats().getCategoryPreferences().entrySet()) {
-                        categoryScores.merge(entry.getKey(), entry.getValue(), Integer::sum);
-                    }
-                }
-            }
+				System.out.println("\n--- Members with emergency contact ---");
+				manager.listMembersWithEmergencyContact();
+		}
 
-            categoryScores.entrySet().stream()
-                    .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                    .forEach(e -> System.out.println("Category: " + e.getKey() + ", Score: " + e.getValue()));
-        }
-    }
+		// 1. Count members by registration year
+		public void countMembersByRegistrationYear() {
+				try (IDocumentSession session = RavenConfig.getDocumentStore().openSession()) {
+						List<Member> members = session.query(Member.class).toList();
 
-    // 5. Top 5 favorite authors
-    public void topFavoriteAuthors() {
-        try (IDocumentSession session = RavenConfig.getDocumentStore().openSession()) {
-            List<Member> members = session.query(Member.class).toList();
-            Map<String, Long> authorCounts = new HashMap<>();
+						Map<Integer, Long> countByYear = members.stream()
+										.map(m -> LocalDateTime.ofInstant(Instant.ofEpochMilli(m.getRegistrationDate()), ZoneId.systemDefault()).getYear())
+										.collect(Collectors.groupingBy(y -> y, TreeMap::new, Collectors.counting()));
 
-            for (Member m : members) {
-                if (m.getReadingStats() != null && m.getReadingStats().getFavoriteAuthors() != null) {
-                    for (String author : m.getReadingStats().getFavoriteAuthors()) {
-                        authorCounts.merge(author, 1L, Long::sum);
-                    }
-                }
-            }
+						countByYear.forEach((year, count) -> System.out.println("Year: " + year + ", Count: " + count));
+				}
+		}
 
-            authorCounts.entrySet().stream()
-                    .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
-                    .limit(5)
-                    .forEach(e -> System.out.println("Author: " + e.getKey() + ", Count: " + e.getValue()));
-        }
-    }
+		// 2. List members with overdue loans
+		public void listMembersWithOverdueLoans() {
+				try (IDocumentSession session = RavenConfig.getDocumentStore().openSession()) {
+						List<Member> members = session.query(Member.class).toList();
 
-    // 6. Members with emergency contact info
-    public void listMembersWithEmergencyContact() {
-        try (IDocumentSession session = RavenConfig.getDocumentStore().openSession()) {
-            List<Member> members = session.query(Member.class).toList();
+						members.stream()
+										.filter(m -> m.getActiveLoans() != null && m.getActiveLoans().stream().anyMatch(Member.ActiveLoan::getIsOverdue))
+										.forEach(m -> {
+												List<Member.ActiveLoan> overdueLoans = m.getActiveLoans().stream()
+																.filter(Member.ActiveLoan::getIsOverdue)
+																.collect(Collectors.toList());
 
-            members.stream()
-                    .filter(m -> m.getContactInfo() != null && m.getContactInfo().getEmergencyContact() != null)
-                    .forEach(m -> {
-                        Member.ContactInfo.EmergencyContact ec = m.getContactInfo().getEmergencyContact();
-                        System.out.println(m.getFirstName() + " " + m.getLastName() +
-                                " | Emergency Contact: " + ec.getName() + " - " + ec.getPhone());
-                    });
-        }
-    }
+												System.out.println("Member: " + m.getFirstName() + " " + m.getLastName() + ", Email: " + m.getEmail());
+												overdueLoans.forEach(loan -> System.out.println("  Overdue Book: " + loan.getBookTitle()));
+										});
+				}
+		}
 
-    public static void main(String[] args) {
-        // Reset RavenDB database
-        RavenConfig.resetDatabase();
+		// 3. Count number of active loans per member
+		public void countLoansPerMember() {
+				try (IDocumentSession session = RavenConfig.getDocumentStore().openSession()) {
+						List<Member> members = session.query(Member.class).toList();
 
-        RavenMemberManager manager = new RavenMemberManager();
+						members.forEach(m -> {
+								int count = m.getActiveLoans() == null ? 0 : m.getActiveLoans().size();
+								System.out.println(m.getFirstName() + " " + m.getLastName() + ": " + count + " loans");
+						});
+				}
+		}
 
-        // Génère quelques membres pour test
-        List<Member> members = ModelDataGenerator.generateMembers(10);
+		// 4. Most preferred categories
+		public void mostPreferredCategories() {
+				try (IDocumentSession session = RavenConfig.getDocumentStore().openSession()) {
+						List<Member> members = session.query(Member.class).toList();
+						Map<String, Integer> categoryScores = new HashMap<>();
 
-        try (IDocumentSession session = manager.store.openSession()) {
-            for (Member member : members) {
-                session.store(member);
-            }
-            session.saveChanges();
-        }
+						for (Member m : members) {
+								if (m.getReadingStats() != null && m.getReadingStats().getCategoryPreferences() != null) {
+										for (Map.Entry<String, Integer> entry : m.getReadingStats().getCategoryPreferences().entrySet()) {
+												categoryScores.merge(entry.getKey(), entry.getValue(), Integer::sum);
+										}
+								}
+						}
 
-        System.out.println("\n--- Members per registration year ---");
-        manager.countMembersByRegistrationYear();
+						categoryScores.entrySet().stream()
+										.sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+										.forEach(e -> System.out.println("Category: " + e.getKey() + ", Score: " + e.getValue()));
+				}
+		}
 
-        System.out.println("\n--- Members with overdue loans ---");
-        manager.listMembersWithOverdueLoans();
+		// 5. Top 5 favorite authors
+		public void topFavoriteAuthors() {
+				try (IDocumentSession session = RavenConfig.getDocumentStore().openSession()) {
+						List<Member> members = session.query(Member.class).toList();
+						Map<String, Long> authorCounts = new HashMap<>();
 
-        System.out.println("\n--- Loans per member ---");
-        manager.countLoansPerMember();
+						for (Member m : members) {
+								if (m.getReadingStats() != null && m.getReadingStats().getFavoriteAuthors() != null) {
+										for (String author : m.getReadingStats().getFavoriteAuthors()) {
+												authorCounts.merge(author, 1L, Long::sum);
+										}
+								}
+						}
 
-        System.out.println("\n--- Most preferred categories ---");
-        manager.mostPreferredCategories();
+						authorCounts.entrySet().stream()
+										.sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+										.limit(5)
+										.forEach(e -> System.out.println("Author: " + e.getKey() + ", Count: " + e.getValue()));
+				}
+		}
 
-        System.out.println("\n--- Top favorite authors ---");
-        manager.topFavoriteAuthors();
+		// 6. Members with emergency contact info
+		public void listMembersWithEmergencyContact() {
+				try (IDocumentSession session = RavenConfig.getDocumentStore().openSession()) {
+						List<Member> members = session.query(Member.class).toList();
 
-        System.out.println("\n--- Members with emergency contact ---");
-        manager.listMembersWithEmergencyContact();
-    }
+						members.stream()
+										.filter(m -> m.getContactInfo() != null && m.getContactInfo().getEmergencyContact() != null)
+										.forEach(m -> {
+												Member.ContactInfo.EmergencyContact ec = m.getContactInfo().getEmergencyContact();
+												System.out.println(m.getFirstName() + " " + m.getLastName() +
+																" | Emergency Contact: " + ec.getName() + " - " + ec.getPhone());
+										});
+				}
+		}
 }

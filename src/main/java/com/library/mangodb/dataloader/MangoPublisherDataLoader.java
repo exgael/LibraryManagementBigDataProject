@@ -1,8 +1,8 @@
 package com.library.mangodb.dataloader;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.library.mangodb.crud.MangoPublisherRepository;
 import com.library.common.model.Publisher;
+import com.library.mangodb.crud.MangoPublisherRepository;
 
 import java.util.List;
 

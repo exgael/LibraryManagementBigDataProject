@@ -1,8 +1,8 @@
 package com.library.mangodb.dataloader;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.library.mangodb.crud.MangoMemberRepository;
 import com.library.common.model.Member;
+import com.library.mangodb.crud.MangoMemberRepository;
 
 import java.util.List;
 

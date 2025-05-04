@@ -1,7 +1,6 @@
 package com.library.mangodb;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
@@ -16,7 +15,7 @@ public class MongoConfig {
 		private static final Logger logger = LogManager.getLogger();
 		private static final String CONNECTION_STRING = "mongodb://localhost:27017";
 		private static final String DATABASE_NAME = "library_management";
-
+		private static final ObjectMapper mapper = new ObjectMapper();
 		private static MongoClient mongoClient;
 
 		public static MongoDatabase getDatabase() {
@@ -40,13 +39,11 @@ public class MongoConfig {
 				}
 		}
 
-	private static final ObjectMapper mapper = new ObjectMapper();
-
-	public static String toJson(Object obj) {
-		try {
-			return mapper.writeValueAsString(obj);
-		} catch (Exception e) {
-			throw new RuntimeException("Error converting to JSON", e);
+		public static String toJson(Object obj) {
+				try {
+						return mapper.writeValueAsString(obj);
+				} catch (Exception e) {
+						throw new RuntimeException("Error converting to JSON", e);
+				}
 		}
-	}
 }

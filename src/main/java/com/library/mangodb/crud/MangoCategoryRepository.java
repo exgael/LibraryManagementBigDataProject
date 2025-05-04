@@ -1,10 +1,9 @@
 package com.library.mangodb.crud;
 
-import com.library.mangodb.MangoUtils;
-import com.library.mangodb.MongoConfig;
 import com.library.common.model.Category;
 import com.library.common.util.ModelDataGenerator;
-import com.library.mangodb.manager.MangoCategoryManager;
+import com.library.mangodb.MangoUtils;
+import com.library.mangodb.MongoConfig;
 import com.mongodb.client.model.UpdateOptions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -180,7 +179,7 @@ public class MangoCategoryRepository extends MongoGenericRepository<Category> {
 						logger.info("Deleted {} categories", categoriesBeforeDeletion.size() - categoriesAfterDeletion.size());
 				}
 
-			logger.info("All category tests completed successfully!");
+				logger.info("All category tests completed successfully!");
 		}
 
 		@Override

@@ -105,11 +105,11 @@ public class Book {
 		}
 
 		public static class LoanRecord {
-			private String memberId;
-			private String memberName;
-			private long loanDate;
-			private long dueDate;
-			private Long returnDate;
+				private String memberId;
+				private String memberName;
+				private long loanDate;
+				private long dueDate;
+				private Long returnDate;
 
 				public String getMemberId() {
 						return memberId;

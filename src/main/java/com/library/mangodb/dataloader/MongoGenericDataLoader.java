@@ -1,6 +1,5 @@
 package com.library.mangodb.dataloader;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.library.common.GenericDataLoader;
 import com.library.mangodb.MongoConfig;
 import com.library.mangodb.crud.MongoGenericRepository;

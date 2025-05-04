@@ -1,6 +1,5 @@
 package com.library.ravendb.dataloader;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.library.common.GenericDataLoader;
 import com.library.ravendb.RavenConfig;
 import com.library.ravendb.crud.RavenGenericRepository;

@@ -1,8 +1,8 @@
 package com.library.ravendb.crud;
 
 import com.library.common.model.Publisher;
-import com.library.ravendb.RavenConfig;
 import com.library.common.util.ModelDataGenerator;
+import com.library.ravendb.RavenConfig;
 import net.ravendb.client.documents.session.IDocumentSession;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

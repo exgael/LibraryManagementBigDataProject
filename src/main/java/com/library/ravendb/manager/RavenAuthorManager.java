@@ -12,131 +12,131 @@ import java.util.stream.Collectors;
 
 public class RavenAuthorManager {
 
-    private final IDocumentStore store;
+		private final IDocumentStore store;
 
-    public RavenAuthorManager() {
-        this.store = new DocumentStore("http://localhost:8080", "LibraryDB");
-        this.store.initialize();
-    }
+		public RavenAuthorManager() {
+				this.store = new DocumentStore("http://localhost:8080", "LibraryDB");
+				this.store.initialize();
+		}
 
-    // 1. Count authors by nationality
-    public void countAuthorsByNationality() {
-        try (IDocumentSession session = store.openSession()) {
-            List<Author> authors = session.query(Author.class).toList();
+		public static void main(String[] args) {
+				RavenAuthorManager manager = new RavenAuthorManager();
 
-            Map<String, Long> countByNationality = authors.stream()
-                    .collect(Collectors.groupingBy(Author::getNationality, Collectors.counting()));
+				// Generate test data
+				List<Author> testAuthors = ModelDataGenerator.generateAuthors(10);
+				List<Book> testBooks = new ArrayList<>();
 
-            countByNationality.entrySet().stream()
-                    .sorted((e1, e2) -> Long.compare(e2.getValue(), e1.getValue()))
-                    .forEach(e -> System.out.println(e.getKey() + ": " + e.getValue()));
-        }
-    }
+				try (IDocumentSession session = manager.store.openSession()) {
+						for (int i = 0; i < testAuthors.size(); i++) {
+								Author author = testAuthors.get(i);
+								author.setId(UUID.randomUUID().toString());
+								session.store(author);
 
-    // 2. List authors by nationality
-    public void listAuthorsByNationality(String nationality) {
-        try (IDocumentSession session = store.openSession()) {
-            List<Author> authors = session.query(Author.class)
-                    .whereEquals("nationality", nationality)
-                    .toList();
+								// Create book for each author
+								Book book = new Book();
+								book.setId(UUID.randomUUID().toString());
+								book.setTitle("Book by " + author.getName());
+								book.setAuthorsId(List.of(author.getId()));
+								testBooks.add(book);
+								session.store(book);
+						}
+						session.saveChanges();
+				}
 
-            authors.forEach(author -> System.out.println(author.getName()));
-        }
-    }
+				System.out.println("1. Count Authors by Nationality:");
+				manager.countAuthorsByNationality();
 
-    // 3. Authors starting with a given letter
-    public void findAuthorsStartingWith(char letter) {
-        try (IDocumentSession session = store.openSession()) {
-            List<Author> authors = session.query(Author.class).toList();
+				String nationality = testAuthors.get(0).getNationality();
+				System.out.println("\n2. List Authors by Nationality (" + nationality + "):");
+				manager.listAuthorsByNationality(nationality);
 
-            authors.stream()
-                    .filter(author -> author.getName() != null && author.getName().toLowerCase().startsWith(String.valueOf(letter).toLowerCase()))
-                    .forEach(author -> System.out.println(author.getName() + " (" + author.getNationality() + ")"));
-        }
-    }
+				System.out.println("\n3. Authors Starting with 'A':");
+				manager.findAuthorsStartingWith('A');
 
-    // 4. Compute name length
-    public void computeNameLengthForAuthors() {
-        try (IDocumentSession session = store.openSession()) {
-            List<Author> authors = session.query(Author.class).toList();
+				System.out.println("\n4. Compute Name Length for Authors:");
+				manager.computeNameLengthForAuthors();
 
-            authors.forEach(author -> {
-                int length = author.getName() != null ? author.getName().length() : 0;
-                System.out.println(author.getName() + " (Length: " + length + ")");
-            });
-        }
-    }
+				System.out.println("\n5. Sort Authors by Name:");
+				manager.sortAuthorsByName();
 
-    // 5. Sort authors by name
-    public void sortAuthorsByName() {
-        try (IDocumentSession session = store.openSession()) {
-            List<Author> authors = session.query(Author.class).toList();
+				System.out.println("\n6. Authors with Books:");
+				manager.getAuthorsWithBooks();
+		}
 
-            authors.stream()
-                    .sorted(Comparator.comparing(Author::getName, String.CASE_INSENSITIVE_ORDER))
-                    .forEach(author -> System.out.println(author.getName()));
-        }
-    }
+		// 1. Count authors by nationality
+		public void countAuthorsByNationality() {
+				try (IDocumentSession session = store.openSession()) {
+						List<Author> authors = session.query(Author.class).toList();
 
-    // 6. Simulate join with books using authorsId
-    public void getAuthorsWithBooks() {
-        try (IDocumentSession session = store.openSession()) {
-            List<Author> authors = session.query(Author.class).toList();
-            List<Book> books = session.query(Book.class).toList();
+						Map<String, Long> countByNationality = authors.stream()
+										.collect(Collectors.groupingBy(Author::getNationality, Collectors.counting()));
 
-            for (Author author : authors) {
-                String authorId = author.getId();
-                List<Book> authorBooks = books.stream()
-                        .filter(book -> book.getAuthorsId() != null && book.getAuthorsId().contains(authorId))
-                        .collect(Collectors.toList());
+						countByNationality.entrySet().stream()
+										.sorted((e1, e2) -> Long.compare(e2.getValue(), e1.getValue()))
+										.forEach(e -> System.out.println(e.getKey() + ": " + e.getValue()));
+				}
+		}
 
-                System.out.println("Author: " + author.getName());
-                authorBooks.forEach(book -> System.out.println("  - " + book.getTitle()));
-            }
-        }
-    }
+		// 2. List authors by nationality
+		public void listAuthorsByNationality(String nationality) {
+				try (IDocumentSession session = store.openSession()) {
+						List<Author> authors = session.query(Author.class)
+										.whereEquals("nationality", nationality)
+										.toList();
 
-    public static void main(String[] args) {
-        RavenAuthorManager manager = new RavenAuthorManager();
+						authors.forEach(author -> System.out.println(author.getName()));
+				}
+		}
 
-        // Generate test data
-        List<Author> testAuthors = ModelDataGenerator.generateAuthors(10);
-        List<Book> testBooks = new ArrayList<>();
+		// 3. Authors starting with a given letter
+		public void findAuthorsStartingWith(char letter) {
+				try (IDocumentSession session = store.openSession()) {
+						List<Author> authors = session.query(Author.class).toList();
 
-        try (IDocumentSession session = manager.store.openSession()) {
-            for (int i = 0; i < testAuthors.size(); i++) {
-                Author author = testAuthors.get(i);
-                author.setId(UUID.randomUUID().toString());
-                session.store(author);
+						authors.stream()
+										.filter(author -> author.getName() != null && author.getName().toLowerCase().startsWith(String.valueOf(letter).toLowerCase()))
+										.forEach(author -> System.out.println(author.getName() + " (" + author.getNationality() + ")"));
+				}
+		}
 
-                // Create book for each author
-                Book book = new Book();
-                book.setId(UUID.randomUUID().toString());
-                book.setTitle("Book by " + author.getName());
-                book.setAuthorsId(List.of(author.getId()));
-                testBooks.add(book);
-                session.store(book);
-            }
-            session.saveChanges();
-        }
+		// 4. Compute name length
+		public void computeNameLengthForAuthors() {
+				try (IDocumentSession session = store.openSession()) {
+						List<Author> authors = session.query(Author.class).toList();
 
-        System.out.println("1. Count Authors by Nationality:");
-        manager.countAuthorsByNationality();
+						authors.forEach(author -> {
+								int length = author.getName() != null ? author.getName().length() : 0;
+								System.out.println(author.getName() + " (Length: " + length + ")");
+						});
+				}
+		}
 
-        String nationality = testAuthors.get(0).getNationality();
-        System.out.println("\n2. List Authors by Nationality (" + nationality + "):");
-        manager.listAuthorsByNationality(nationality);
+		// 5. Sort authors by name
+		public void sortAuthorsByName() {
+				try (IDocumentSession session = store.openSession()) {
+						List<Author> authors = session.query(Author.class).toList();
 
-        System.out.println("\n3. Authors Starting with 'A':");
-        manager.findAuthorsStartingWith('A');
+						authors.stream()
+										.sorted(Comparator.comparing(Author::getName, String.CASE_INSENSITIVE_ORDER))
+										.forEach(author -> System.out.println(author.getName()));
+				}
+		}
 
-        System.out.println("\n4. Compute Name Length for Authors:");
-        manager.computeNameLengthForAuthors();
+		// 6. Simulate join with books using authorsId
+		public void getAuthorsWithBooks() {
+				try (IDocumentSession session = store.openSession()) {
+						List<Author> authors = session.query(Author.class).toList();
+						List<Book> books = session.query(Book.class).toList();
 
-        System.out.println("\n5. Sort Authors by Name:");
-        manager.sortAuthorsByName();
+						for (Author author : authors) {
+								String authorId = author.getId();
+								List<Book> authorBooks = books.stream()
+												.filter(book -> book.getAuthorsId() != null && book.getAuthorsId().contains(authorId))
+												.collect(Collectors.toList());
 
-        System.out.println("\n6. Authors with Books:");
-        manager.getAuthorsWithBooks();
-    }
+								System.out.println("Author: " + author.getName());
+								authorBooks.forEach(book -> System.out.println("  - " + book.getTitle()));
+						}
+				}
+		}
 }
