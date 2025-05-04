@@ -7,6 +7,12 @@ Exemple d’application Java mettant en œuvre MongoDB pour la gestion d’une b
 Tous les fichiers peuvent être retrouvé ici:
 [LibraryManagementBigDataProject](https://github.com/exgael/LibraryManagementBigDataProject.git)
 
+
+## Répartition du Travail
+    Points 2,3,4: Abboud Massinissa
+    Points 5,6,7: Benoit Barbier
+    Points 8,9: Laurine Collin Dufresne
+
 ## Prérequis
 
 * **JDK 23.0.2 (⚠️ langage level 16 minimum)**

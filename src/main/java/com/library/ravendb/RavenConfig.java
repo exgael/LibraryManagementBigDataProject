@@ -63,53 +63,29 @@ public class RavenConfig {
 
 						DocumentStore store = getDocumentStore();
 
-						// We'll use a different approach - we know the collection names in our app
-						try (net.ravendb.client.documents.session.IDocumentSession session = store.openSession()) {
-								// Clear each known collection
-								for (String collection : KNOWN_COLLECTIONS) {
-										try {
-												session.advanced().rawQuery(Object.class,
-																				"from " + collection + " as doc delete doc")
-																.executeAggregation();
-										} catch (Exception e) {
-												// Collection might not exist yet, continue
-										}
-								}
+						// Delete all documents from known collections
+						for (String collection : KNOWN_COLLECTIONS) {
+								logger.info("Clearing collection: {}", collection);
 
-								// Commit the changes
-								session.saveChanges();
+								// Use a separate session for each collection to avoid transaction size issues
+								try (var session = store.openSession()) {
+										// Use the operation directly with the collection name
+										session.advanced().documentQuery(Object.class)
+														.waitForNonStaleResults()
+														.toList()
+														.forEach(document -> {
+																String id = session.advanced().getDocumentId(document);
+																session.delete(id);
+														});
+
+										// Save changes for this collection
+										session.saveChanges();
+								}
 						}
 
 						logger.info("Database reset completed (collections cleared): {}", DATABASE_NAME);
 				} catch (Exception e) {
 						logger.error("Error resetting database: ", e);
-				}
-		}
-
-		public static void hardResetDatabase() {
-				try {
-						logger.info("Hard resetting database: {}", DATABASE_NAME);
-
-						DocumentStore store = getDocumentStore();
-
-						// Delete the database
-						store.maintenance().server()
-										.send(new DeleteDatabasesOperation(DATABASE_NAME, true));
-
-						// Wait for a moment to ensure deletion completes
-						try {
-								TimeUnit.SECONDS.sleep(5);
-						} catch (InterruptedException e) {
-								Thread.currentThread().interrupt();
-						}
-
-						// Recreate the database
-						store.maintenance().server()
-										.send(new CreateDatabaseOperation(new DatabaseRecord(DATABASE_NAME)));
-
-						logger.info("Database hard reset completed: {}", DATABASE_NAME);
-				} catch (Exception e) {
-						logger.error("Error performing hard reset of database: ", e);
 				}
 		}
 
