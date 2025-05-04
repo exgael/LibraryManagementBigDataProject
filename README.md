@@ -21,6 +21,13 @@ OpenJDK Runtime Environment Homebrew (build 23.0.2)
 OpenJDK 64-Bit Server VM Homebrew (build 23.0.2, mixed mode, sharing)
 ```
 
+## Verification
+
+```sh
+mvn clean verify
+```
+
+
 ## Démarrage rapide avec Docker
 
 ```bash
