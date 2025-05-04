@@ -19,7 +19,7 @@ import java.util.stream.IntStream;
  */
 public class ModelDataGenerator {
 		private static final Logger logger = LogManager.getLogger();
-		private static final Faker faker = new Faker(new Locale("en-US"));
+		private static final Faker faker = new Faker(Locale.forLanguageTag("en-US"));
 		private static final Long MILLISECONDS_IN_DAY = 86400000L;
 
 		// Maps to store generated entities
@@ -36,7 +36,6 @@ public class ModelDataGenerator {
 		public static List<Author> generateAuthors(int count) {
 				logger.info("Generating {} author documents", count);
 
-				Random random = new Random();
 				for (int i = 0; i < count; i++) {
 						Author author = new Author();
 						author.setId(new ObjectId().toString());
@@ -379,7 +378,8 @@ public class ModelDataGenerator {
 				try {
 						File outputDir = new File(outputPath);
 						if (!outputDir.exists()) {
-								boolean _wasCreated = outputDir.mkdirs();
+								boolean created = outputDir.mkdirs();
+								System.out.println("Output directory created: " + created);
 						}
 
 						ObjectMapper mapper = new ObjectMapper();
