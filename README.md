@@ -9,10 +9,17 @@ Tous les fichiers peuvent être retrouvé ici:
 
 ## Prérequis
 
-* **JDK 16** (11 minimum)
+* **JDK 23.0.2 (⚠️ langage level 16 minimum)**
 * **Maven ≥  3.9**
 * **Docker 20 +** ou un serveur **MongoDB ≥  6.0** local
 * **RavenDB ≥  5.x** *(facultatif, uniquement pour la partie comparaison)*
+
+Le projet à été testé avec:
+```
+openjdk version "23.0.2" 2025-01-21
+OpenJDK Runtime Environment Homebrew (build 23.0.2)
+OpenJDK 64-Bit Server VM Homebrew (build 23.0.2, mixed mode, sharing)
+```
 
 ## Démarrage rapide avec Docker
 
@@ -42,7 +49,7 @@ docker run -d --name ravendb -p 8080:8080 -p 38888:38888 -v ravendb-data:/opt/Ra
 * Dossier : [generated-data/](https://github.com/exgael/LibraryManagementBigDataProject/tree/main/generated-data)
 * Utilisé par le générateur de données  ; son contenu peut être régénéré.
 
-* Génération: [src/main/java/com/library/common/util/ModelDataGenerator.java](https://github.com/exgael/LibraryManagementBigDataProject/blob/main/src/main/java/com/library/common/GenericDataLoader.java)
+* Génération: [src/main/java/com/library/common/util/ModelDataGenerator.java](https://github.com/exgael/LibraryManagementBigDataProject/blob/main/src/main/java/com/library/common/util/ModelDataGenerator.java)
 
 ### 4. Scripts de chargement
 
